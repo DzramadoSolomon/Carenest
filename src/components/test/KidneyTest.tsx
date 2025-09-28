@@ -10,6 +10,7 @@ interface KidneyTestProps {
 }
 
 const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
+  // ... state declarations ...
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -19,7 +20,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
 
-  // Helper function to stop the camera stream safely
+  // Helper function for camera cleanup (Good practice for robustness)
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
@@ -29,7 +30,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     setShowCamera(false);
   };
     
-  // Cleanup effect
+  // Cleanup camera on unmount
   useEffect(() => {
     return () => {
       stopCamera();
@@ -40,9 +41,6 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     const file = event.target.files?.[0];
     
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-      // Clear camera view if active
-      if (showCamera) stopCamera();
-      
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -62,15 +60,15 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       });
     }
     
-    // **FIX:** Reset the file input value so that selecting the same file 
-    // or a new file will re-trigger the onChange event and the analysis.
+    // **FIX 1:** Explicitly reset the file input value. 
+    // This ensures onChange fires even if the same file name is chosen.
     if (event.target) {
       event.target.value = ''; 
     }
   };
 
   const startCamera = async () => {
-    // Clear previous results/selections
+    // Clear previous results/selections for a clean new scan
     setSelectedImage(null);
     setImagePreview(null);
     setResult(null);
@@ -97,7 +95,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx?.drawImage(video, 0, 0);
       
       canvas.toBlob((blob) => {
         if (blob) {
@@ -122,13 +120,12 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     if (!selectedImage) return;
     
     setIsScanning(true);
-    setResult(null); // Clear previous result before starting scan
+    setResult(null); // Ensure loading state is shown by clearing previous result
     
     try {
+      // The new selectedImage (the new file object) is passed here
       const analysisResult = await analyzeImageWithModel(selectedImage);
       setResult(analysisResult);
-      // Assuming saveAnalysisResult is async based on common practices, 
-      // though your model.ts shows it as sync (void). Keeping it as is.
       saveAnalysisResult(analysisResult); 
       toast({
         title: "Scan complete",
@@ -142,24 +139,6 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       });
     } finally {
       setIsScanning(false);
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'normal': return 'text-green-600 bg-green-50 border-green-200';
-      case 'high-risk': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'danger': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
-  const getColorIndicator = (color: string) => {
-    switch (color) {
-      case 'yellow': return 'bg-yellow-400';
-      case 'orange': return 'bg-orange-400';
-      case 'green': return 'bg-green-400';
-      default: return 'bg-gray-400';
     }
   };
 
