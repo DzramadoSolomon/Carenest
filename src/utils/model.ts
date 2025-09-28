@@ -17,18 +17,21 @@ let model: tf.LayersModel | null = null;
  * Load the TensorFlow.js model
  * Place your keras_Model.h5 file in the public folder
  */
+// model.ts
+
 export const loadModel = async (): Promise<tf.LayersModel> => {
-  if (model) return model;
-  
-  try {
-    // Load model from public folder
-    model = await tf.loadLayersModel('/keras_Model.h5');
-    console.log('Model loaded successfully');
-    return model;
-  } catch (error) {
-    console.error('Error loading model:', error);
-    throw new Error('Failed to load kidney analysis model. Please ensure keras_Model.h5 is in the public folder.');
-  }
+   if (model) return model;
+   
+   try {
+     // PREVIOUS: model = await tf.loadLayersModel('/model/model.json');
+    // CORRECTED: Since model.json is in the public root, the path is simpler.
+     model = await tf.loadLayersModel('/model.json'); // ✨ CORRECTED PATH
+     console.log('Model loaded successfully');
+     return model;
+   } catch (error) {
+     console.error('Error loading model:', error);
+     throw new Error('Failed to load kidney analysis model. Please ensure model.json is in the public folder.');
+   }
 };
 
 /**
