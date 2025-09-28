@@ -1,14 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 
-// In model.ts
 
-export const analyzeImageWithModel = async (imageFile: File): Promise<AnalysisResult> => {
-  // ✨ ADD THIS DEBUGGING LINE
-  console.log(`Starting analysis for: ${imageFile.name}, Size: ${imageFile.size} bytes`);
-  
-  try {
-    // ... rest of your function
-      export interface AnalysisResult {
+export interface AnalysisResult {
         confidence: number;
         diagnosis: string;
         recommendations: string[];
