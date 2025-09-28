@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Camera, Scan, ArrowLeft } from 'lucide-react';
@@ -19,9 +19,30 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
 
+  // Helper function to stop the camera stream safely
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setShowCamera(false);
+  };
+    
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []); 
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+      // Clear camera view if active
+      if (showCamera) stopCamera();
+      
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -40,9 +61,20 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         variant: "destructive",
       });
     }
+    
+    // **FIX:** Reset the file input value so that selecting the same file 
+    // or a new file will re-trigger the onChange event and the analysis.
+    if (event.target) {
+      event.target.value = ''; 
+    }
   };
 
   const startCamera = async () => {
+    // Clear previous results/selections
+    setSelectedImage(null);
+    setImagePreview(null);
+    setResult(null);
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -65,18 +97,18 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0);
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
       
       canvas.toBlob((blob) => {
         if (blob) {
           const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
           setSelectedImage(file);
           setImagePreview(canvas.toDataURL());
-          setShowCamera(false);
           setResult(null);
+          
           // Stop camera stream
-          const stream = video.srcObject as MediaStream;
-          stream?.getTracks().forEach(track => track.stop());
+          stopCamera();
+          
           toast({
             title: "Image captured",
             description: "Image ready for analysis",
@@ -90,10 +122,14 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     if (!selectedImage) return;
     
     setIsScanning(true);
+    setResult(null); // Clear previous result before starting scan
+    
     try {
       const analysisResult = await analyzeImageWithModel(selectedImage);
       setResult(analysisResult);
-      saveAnalysisResult(analysisResult);
+      // Assuming saveAnalysisResult is async based on common practices, 
+      // though your model.ts shows it as sync (void). Keeping it as is.
+      saveAnalysisResult(analysisResult); 
       toast({
         title: "Scan complete",
         description: "Analysis results are ready",
@@ -187,7 +223,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                     Capture Image
                   </Button>
                   <Button
-                    onClick={() => setShowCamera(false)}
+                    onClick={stopCamera}
                     variant="outline"
                     className="flex-1"
                   >
