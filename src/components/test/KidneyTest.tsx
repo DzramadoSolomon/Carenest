@@ -10,7 +10,6 @@ interface KidneyTestProps {
 }
 
 const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
-  // ... state declarations ...
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -20,25 +19,35 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
 
-  // Helper function for camera cleanup (Good practice for robustness)
+  // CRITICAL: Safely stops the camera stream and resets state
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(track => {
+        // Stop all tracks to fully release the hardware
+        track.stop();
+      });
       videoRef.current.srcObject = null;
     }
-    setShowCamera(false);
+    // Only set state if the camera was actually showing
+    if (showCamera) {
+      setShowCamera(false);
+    }
   };
     
-  // Cleanup camera on unmount
+  // Cleanup camera on component unmount
   useEffect(() => {
     return () => {
+      // Ensure the camera is stopped when the component is removed from the DOM
       stopCamera();
     };
   }, []); 
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    
+    // Ensure camera is stopped if a file is uploaded while camera is active
+    stopCamera(); 
     
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       setSelectedImage(file);
@@ -60,15 +69,14 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       });
     }
     
-    // **FIX 1:** Explicitly reset the file input value. 
-    // This ensures onChange fires even if the same file name is chosen.
+    // FIX: Explicitly reset the file input value
     if (event.target) {
       event.target.value = ''; 
     }
   };
 
   const startCamera = async () => {
-    // Clear previous results/selections for a clean new scan
+    // Clear results before starting the camera session
     setSelectedImage(null);
     setImagePreview(null);
     setResult(null);
@@ -85,6 +93,8 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         description: "Unable to access camera",
         variant: "destructive",
       });
+      // CRITICAL: If camera fails, ensure state is reset
+      setShowCamera(false); 
     }
   };
 
@@ -95,7 +105,8 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0);
+      // Use video.videoWidth/Height to ensure drawing correct dimensions
+      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); 
       
       canvas.toBlob((blob) => {
         if (blob) {
@@ -104,7 +115,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           setImagePreview(canvas.toDataURL());
           setResult(null);
           
-          // Stop camera stream
+          // Stop camera stream after capture
           stopCamera();
           
           toast({
@@ -120,10 +131,9 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     if (!selectedImage) return;
     
     setIsScanning(true);
-    setResult(null); // Ensure loading state is shown by clearing previous result
+    setResult(null); // Ensure loading state is shown
     
     try {
-      // The new selectedImage (the new file object) is passed here
       const analysisResult = await analyzeImageWithModel(selectedImage);
       setResult(analysisResult);
       saveAnalysisResult(analysisResult); 
@@ -132,13 +142,34 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         description: "Analysis results are ready",
       });
     } catch (error) {
+      console.error("Scan Failed in Component:", error); // Log the component-level failure
       toast({
         title: "Scan failed",
         description: "Please try again",
         variant: "destructive",
       });
+      // CRITICAL: Ensure scanning state is false even on error to re-enable button
+      setResult(null); 
     } finally {
       setIsScanning(false);
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'normal': return 'text-green-600 bg-green-50 border-green-200';
+      case 'high-risk': return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'danger': return 'text-red-600 bg-red-50 border-red-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getColorIndicator = (color: string) => {
+    switch (color) {
+      case 'yellow': return 'bg-yellow-400';
+      case 'orange': return 'bg-orange-400';
+      case 'green': return 'bg-green-400';
+      default: return 'bg-gray-400';
     }
   };
 
@@ -202,7 +233,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                     Capture Image
                   </Button>
                   <Button
-                    onClick={stopCamera}
+                    onClick={stopCamera} // Use the robust stopCamera function
                     variant="outline"
                     className="flex-1"
                   >
@@ -241,6 +272,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           </CardContent>
         </Card>
 
+        {/* ... Analysis Results Card ... */}
         <Card>
           <CardHeader>
             <CardTitle>Analysis Results</CardTitle>
