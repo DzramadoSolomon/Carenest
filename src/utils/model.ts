@@ -35,60 +35,68 @@ export interface AnalysisResult {
          }
       };
       
-      /**
-       * Preprocess image for model prediction
-       * Matches the preprocessing from your Python code
-       */
-      const preprocessImage = async (imageFile: File): Promise<tf.Tensor> => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            // Create canvas for image processing
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            if (!ctx) {
-              reject(new Error('Could not get canvas context'));
-              return;
-            }
-            
-            // Resize to 224x224 (model input size)
-            canvas.width = 224;
-            canvas.height = 224;
-            
-            // Draw and resize image
-            ctx.drawImage(img, 0, 0, 224, 224);
-            
-            // Get image data
-            const imageData = ctx.getImageData(0, 0, 224, 224);
-            const data = imageData.data;
-            
-            // Convert to tensor and normalize (matching Python code)
-            const tensor = tf.tidy(() => {
-              // Convert RGBA to RGB and normalize
-              const rgbData = new Float32Array(224 * 224 * 3);
-              for (let i = 0; i < data.length; i += 4) {
-                const idx = (i / 4) * 3;
-                rgbData[idx] = data[i] / 255.0;     // R
-                rgbData[idx + 1] = data[i + 1] / 255.0; // G
-                rgbData[idx + 2] = data[i + 2] / 255.0; // B
-              }
-              
-              // Create tensor and normalize: (pixel_value / 127.5) - 1
-              const imageTensor = tf.tensor3d(rgbData, [224, 224, 3]);
-              const normalized = imageTensor.div(127.5).sub(1);
-              
-              // Add batch dimension
-              return normalized.expandDims(0);
-            });
-            
-            resolve(tensor);
-          };
-          
-          img.onerror = () => reject(new Error('Failed to load image'));
-          img.src = URL.createObjectURL(imageFile);
-        });
-      };
+  
+const preprocessImage = async (imageFile: File): Promise<tf.Tensor> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    // Create temporary URL for the image file
+    const objectURL = URL.createObjectURL(imageFile); 
+
+    img.onload = () => {
+      // **FIX 2:** Revoke the temporary URL immediately after the image is loaded.
+      // This is crucial for performance and preventing resource leaks/caching issues.
+      URL.revokeObjectURL(objectURL);
+
+      // Create canvas for image processing
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      // Resize to 224x224 (model input size)
+      canvas.width = 224;
+      canvas.height = 224;
+      
+      // Draw and resize image
+      ctx.drawImage(img, 0, 0, 224, 224);
+      
+      // Get image data
+      const data = ctx.getImageData(0, 0, 224, 224).data;
+      
+      // Convert to tensor and normalize
+      const tensor = tf.tidy(() => {
+        const rgbData = new Float32Array(224 * 224 * 3);
+        for (let i = 0; i < data.length; i += 4) {
+          const idx = (i / 4) * 3;
+          rgbData[idx] = data[i] / 255.0;     // R
+          rgbData[idx + 1] = data[i + 1] / 255.0; // G
+          rgbData[idx + 2] = data[i + 2] / 255.0; // B
+        }
+        
+        const imageTensor = tf.tensor3d(rgbData, [224, 224, 3]);
+        const normalized = imageTensor.div(127.5).sub(1);
+        
+        // Add batch dimension
+        return normalized.expandDims(0);
+      });
+      
+      resolve(tensor);
+    };
+    
+    img.onerror = (e) => {
+      // Revoke on error too
+      URL.revokeObjectURL(objectURL);
+      reject(new Error(`Failed to load image from URL: ${e}`));
+    };
+    
+    img.src = objectURL;
+  });
+};
+
+// ... rest of model.ts remains the same
       
       /**
        * Interpret model prediction results
