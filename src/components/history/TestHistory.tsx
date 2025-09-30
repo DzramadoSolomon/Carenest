@@ -18,6 +18,7 @@ interface TestHistoryProps {
 }
 
 const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
+  // ... (no changes to state or helper functions) ...
   const [showAll, setShowAll] = useState(false);
   const history = getAnalysisHistory();
 
@@ -34,7 +35,6 @@ const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
     }
   };
 
-  // ✅ NEW: Function to get the border color for the card
   const getSeverityBorderColor = (severity: string): string => {
     switch (severity) {
       case 'normal':
@@ -76,6 +76,7 @@ const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      {/* ... (no changes to header) ... */}
       <div className="flex items-center mb-6">
         <Button variant="ghost" onClick={onBack} className="mr-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -96,11 +97,12 @@ const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
              <ResponsiveContainer width="100%" height={250}>
                <LineChart
                  data={chartData}
-                 // ✅ CORRECTED: Increased left margin to give labels space
-                 margin={{ top: 5, right: 20, left: 15, bottom: 5 }}
+                 // ✅ FIX 1: Increased left margin for Y-axis label spacing
+                 margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
                >
                  <CartesianGrid strokeDasharray="3 3" />
-                 <XAxis dataKey="name" />
+                 {/* ✅ FIX 2: Added interval={0} to show all labels */}
+                 <XAxis dataKey="name" interval={0} angle={-30} textAnchor="end" height={60} />
                  <YAxis 
                    domain={[0, 4]} 
                    ticks={[1, 2, 3]} 
@@ -122,16 +124,18 @@ const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
          </Card>
       )}
 
+      {/* ... (no changes to the rest of the file) ... */}
       {history.length === 0 ? (
         <Card>
-          <CardContent /* ... */ >
-             {/* ... No changes here ... */}
+          <CardContent className="text-center py-12">
+            <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">No Tests Yet</h3>
+            <p className="text-gray-500">Take your first kidney test to see results here.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {displayedHistory.map((result, index) => (
-            // ✅ UPDATED: Added className to apply the dynamic border
             <Card key={result.timestamp} className={getSeverityBorderColor(result.severity)}>
               <CardHeader>
                 <div className="flex items-center justify-between">
