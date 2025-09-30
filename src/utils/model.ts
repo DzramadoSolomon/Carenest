@@ -71,22 +71,26 @@ const preprocessImage = async (imageFile: File): Promise<tf.Tensor> => {
             const data = ctx.getImageData(0, 0, 224, 224).data;
             
             // Convert to tensor and normalize
+                        // ... inside preprocessImage function
             const tensor = tf.tidy(() => {
                 const rgbData = new Float32Array(224 * 224 * 3);
                 for (let i = 0; i < data.length; i += 4) {
                     const idx = (i / 4) * 3;
-                    rgbData[idx] = data[i] / 255.0;     // R
-                    rgbData[idx + 1] = data[i + 1] / 255.0; // G
-                    rgbData[idx + 2] = data[i + 2] / 255.0; // B
+                    // CORRECT: Use raw pixel values [0, 255]
+                    rgbData[idx] = data[i];
+                    rgbData[idx + 1] = data[i + 1];
+                    rgbData[idx + 2] = data[i + 2];
                 }
                 
-                // Create tensor and normalize: (pixel_value / 127.5) - 1
+                // Create tensor from raw [0, 255] data
                 const imageTensor = tf.tensor3d(rgbData, [224, 224, 3]);
+                
+                // Now, correctly normalize from [0, 255] to [-1, 1]
                 const normalized = imageTensor.div(127.5).sub(1);
                 
-                // Add batch dimension
                 return normalized.expandDims(0);
             });
+
             
             resolve(tensor);
         };
