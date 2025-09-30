@@ -10,7 +10,6 @@ interface KidneyTestProps {
 }
 
 const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
-  // ... (no changes to state and refs) ...
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -20,31 +19,31 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
 
+  // ✅ REVISED LOGIC: Store the stream in state to manage its lifecycle correctly.
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
-  // ... (no changes to stopCamera, useEffect, handleFileUpload) ...
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => {
-        track.stop();
-      });
-      videoRef.current.srcObject = null;
-    }
-    if (showCamera) {
-      setShowCamera(false);
-    }
-  };
-    
+  // This effect attaches the stream to the video element once both are ready.
   useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+    }
+  }, [stream]);
+
+  // ✅ REVISED LOGIC: Clean up the stream when the component unmounts.
+  useEffect(() => {
+    // The return function from useEffect serves as a cleanup function.
     return () => {
-      stopCamera();
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, []); 
+  }, [stream]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    stopCamera(); // Ensure camera is off if a file is uploaded
     const file = event.target.files?.[0];
-    stopCamera(); 
-    
+
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       setSelectedImage(file);
       const reader = new FileReader();
@@ -64,36 +63,49 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         variant: "destructive",
       });
     }
-    
+
     if (event.target) {
-      event.target.value = ''; 
+      event.target.value = '';
     }
   };
 
+  // ✅ REVISED LOGIC: stopCamera now uses the stream from state.
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setShowCamera(false);
+    setStream(null);
+  };
+
+  // ✅ REVISED LOGIC: startCamera now shows the video element first, then gets the stream.
   const startCamera = async () => {
+    // Stop any existing stream before starting a new one
+    stopCamera(); 
+    
     setSelectedImage(null);
     setImagePreview(null);
     setResult(null);
+    
+    // 1. Show the video element on the page
+    setShowCamera(true);
 
+    // 2. Request camera access and set the stream in state
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setShowCamera(true);
-        // ✅ FIX: Explicitly play the video to start the stream
-        await videoRef.current.play();
-      }
+      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setStream(cameraStream); // This will trigger the useEffect to attach and play
     } catch (error) {
+      console.error("Camera access denied:", error);
       toast({
         title: "Camera error",
-        description: "Unable to access camera",
+        description: "Could not access camera. Please check permissions.",
         variant: "destructive",
       });
+      // Hide the video element if permission fails
       setShowCamera(false); 
     }
   };
 
-  // ... (no changes to the rest of the file) ...
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -101,7 +113,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); 
+      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       
       canvas.toBlob((blob) => {
         if (blob) {
@@ -110,7 +122,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           setImagePreview(canvas.toDataURL());
           setResult(null);
           
-          stopCamera();
+          stopCamera(); // This will now correctly stop the stream from state
           
           toast({
             title: "Image captured",
@@ -148,6 +160,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     }
   };
 
+  // ... (No changes to getSeverityColor, getColorIndicator, or the JSX return) ...
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'normal': return 'text-green-600 bg-green-50 border-green-200';
@@ -218,6 +231,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                   ref={videoRef}
                   autoPlay
                   playsInline
+                  muted // Muting is good practice for user experience
                   className="w-full rounded-lg"
                 />
                 <canvas ref={canvasRef} className="hidden" />
@@ -265,6 +279,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           </CardContent>
         </Card>
 
+        {/* ... Analysis Results Card (no changes) ... */}
         <Card>
           <CardHeader>
             <CardTitle>Analysis Results</CardTitle>
