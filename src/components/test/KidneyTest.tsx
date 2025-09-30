@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Camera, Scan, ArrowLeft } from 'lucide-react';
+import { Upload, Camera, Scan, ArrowLeft, SwitchCamera } from 'lucide-react';
 import { analyzeImageWithModel, saveAnalysisResult, AnalysisResult } from '@/utils/model';
 import { toast } from '@/components/ui/use-toast';
 
@@ -18,6 +18,9 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
+  
+  // ✅ ADDED: State to track which camera is being used
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   // ✅ REVISED LOGIC: Store the stream in state to manage its lifecycle correctly.
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -78,8 +81,8 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     setStream(null);
   };
 
-  // ✅ REVISED LOGIC: startCamera now shows the video element first, then gets the stream.
-  const startCamera = async () => {
+  // ✅ REVISED LOGIC: startCamera now accepts optional camera mode parameter
+  const startCamera = async (cameraMode?: 'user' | 'environment') => {
     // Stop any existing stream before starting a new one
     stopCamera(); 
     
@@ -87,12 +90,20 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     setImagePreview(null);
     setResult(null);
     
+    // Use the provided camera mode or the current state
+    const mode = cameraMode || facingMode;
+    if (cameraMode) {
+      setFacingMode(cameraMode);
+    }
+    
     // 1. Show the video element on the page
     setShowCamera(true);
 
-    // 2. Request camera access and set the stream in state
+    // 2. Request camera access with the specified facing mode
     try {
-      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const cameraStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: mode } 
+      });
       setStream(cameraStream); // This will trigger the useEffect to attach and play
     } catch (error) {
       console.error("Camera access denied:", error);
@@ -104,6 +115,13 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       // Hide the video element if permission fails
       setShowCamera(false); 
     }
+  };
+
+  // ✅ ADDED: Function to flip between front and back camera
+  const flipCamera = () => {
+    const newMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newMode);
+    startCamera(newMode);
   };
 
   const captureImage = () => {
@@ -214,7 +232,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                     Upload Image
                   </Button>
                   <Button
-                    onClick={startCamera}
+                    onClick={() => startCamera()}
                     className="flex-1"
                     variant="outline"
                   >
@@ -238,6 +256,14 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                 <div className="flex gap-4">
                   <Button onClick={captureImage} className="flex-1">
                     Capture Image
+                  </Button>
+                  <Button
+                    onClick={flipCamera}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <SwitchCamera className="w-4 h-4 mr-2" />
+                    Flip Camera
                   </Button>
                   <Button
                     onClick={stopCamera}
