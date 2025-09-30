@@ -10,6 +10,7 @@ interface KidneyTestProps {
 }
 
 const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
+  // ... (no changes to state and refs) ...
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -19,34 +20,29 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showCamera, setShowCamera] = useState(false);
 
-  // CRITICAL: Safely stops the camera stream and resets state
+
+  // ... (no changes to stopCamera, useEffect, handleFileUpload) ...
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => {
-        // Stop all tracks to fully release the hardware
         track.stop();
       });
       videoRef.current.srcObject = null;
     }
-    // Only set state if the camera was actually showing
     if (showCamera) {
       setShowCamera(false);
     }
   };
     
-  // Cleanup camera on component unmount
   useEffect(() => {
     return () => {
-      // Ensure the camera is stopped when the component is removed from the DOM
       stopCamera();
     };
   }, []); 
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    
-    // Ensure camera is stopped if a file is uploaded while camera is active
     stopCamera(); 
     
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
@@ -69,14 +65,12 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       });
     }
     
-    // FIX: Explicitly reset the file input value
     if (event.target) {
       event.target.value = ''; 
     }
   };
 
   const startCamera = async () => {
-    // Clear results before starting the camera session
     setSelectedImage(null);
     setImagePreview(null);
     setResult(null);
@@ -86,6 +80,8 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setShowCamera(true);
+        // ✅ FIX: Explicitly play the video to start the stream
+        await videoRef.current.play();
       }
     } catch (error) {
       toast({
@@ -93,11 +89,11 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         description: "Unable to access camera",
         variant: "destructive",
       });
-      // CRITICAL: If camera fails, ensure state is reset
       setShowCamera(false); 
     }
   };
 
+  // ... (no changes to the rest of the file) ...
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -105,7 +101,6 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-      // Use video.videoWidth/Height to ensure drawing correct dimensions
       ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); 
       
       canvas.toBlob((blob) => {
@@ -115,7 +110,6 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           setImagePreview(canvas.toDataURL());
           setResult(null);
           
-          // Stop camera stream after capture
           stopCamera();
           
           toast({
@@ -131,7 +125,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
     if (!selectedImage) return;
     
     setIsScanning(true);
-    setResult(null); // Ensure loading state is shown
+    setResult(null);
     
     try {
       const analysisResult = await analyzeImageWithModel(selectedImage);
@@ -142,13 +136,12 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
         description: "Analysis results are ready",
       });
     } catch (error) {
-      console.error("Scan Failed in Component:", error); // Log the component-level failure
+      console.error("Scan Failed in Component:", error);
       toast({
         title: "Scan failed",
         description: "Please try again",
         variant: "destructive",
       });
-      // CRITICAL: Ensure scanning state is false even on error to re-enable button
       setResult(null); 
     } finally {
       setIsScanning(false);
@@ -233,7 +226,7 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
                     Capture Image
                   </Button>
                   <Button
-                    onClick={stopCamera} // Use the robust stopCamera function
+                    onClick={stopCamera}
                     variant="outline"
                     className="flex-1"
                   >
@@ -272,7 +265,6 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
           </CardContent>
         </Card>
 
-        {/* ... Analysis Results Card ... */}
         <Card>
           <CardHeader>
             <CardTitle>Analysis Results</CardTitle>
