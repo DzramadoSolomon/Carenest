@@ -1,23 +1,20 @@
+// AuthPage.tsx
 import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
-// Assuming this is where your main application's routing or state is handled
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 
 // Define a prop for handling the successful login/guest entry to the main app
 interface AuthPageProps {
-  onGuestLogin: () => void; // Function to call when guest mode is selected
+  // This prop will now be the function from the parent App.tsx
+  onGuestLogin: () => void;
 }
 
 // Update the component signature to accept the new prop
 const AuthPage: React.FC<AuthPageProps> = ({ onGuestLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isGuestMode, setIsGuestMode] = useState(false);
-  // Note: The `useAuth` is typically only needed in LoginForm/SignupForm,
-  // but if you have a global state for the guest, you might need it here too.
-  // For this implementation, I'll stick to a simple function call.
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
@@ -30,17 +27,21 @@ const AuthPage: React.FC<AuthPageProps> = ({ onGuestLogin }) => {
       title: "Guest Mode Activated",
       description: "⚠️ **Warning**: Your data will not be saved and all results will be lost upon leaving the app.",
       duration: 5000,
-      variant: "default", // You can define a warning variant if available
+      variant: "default",
     });
 
-    // Simulate a brief loading, then navigate to the main interface
+    // --- REAL NAVIGATION LOGIC STARTS HERE ---
+    // The delay is kept for the 'Entering as Guest...' message to be visible
     setTimeout(() => {
-      onGuestLogin(); // Leads the user to the main interface
-      setIsGuestMode(false); // Reset loading state
+      onGuestLogin(); // This function call now updates the app's view state!
+      // In the conceptual App.tsx, this call changes the view to the Dashboard.
     }, 500);
+    // The `setIsGuestMode(false)` is not strictly necessary here because 
+    // the component will unmount once `onGuestLogin` triggers the view change.
   };
 
   return (
+    // ... (rest of the JSX from the previous step remains the same)
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -53,8 +54,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onGuestLogin }) => {
           <SignupForm onToggleMode={toggleMode} />
         )}
         
-        {/* --- */}
-
         {/* New Guest Option */}
         <div className="mt-6">
           <div className="flex items-center my-4">
