@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, Bot, User, ArrowLeft, Info } from 'lucide-react';
+import { Send, Bot, User, ArrowLeft, Info, AlertTriangle } from 'lucide-react';
 import ChatBotExplanation from '../chatbot/ChatBotExplanation';
 
 interface Message {
@@ -18,6 +18,10 @@ interface ChatBotProps {
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
+  // --- IMPORTANT ---
+  // PASTE YOUR GOOGLE AI STUDIO API KEY HERE
+  const API_KEY = 'PASTE_YOUR_API_KEY_HERE';
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -28,6 +32,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -38,39 +43,49 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
     scrollToBottom();
   }, [messages]);
 
-  const getBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('test') || lowerMessage.includes('how')) {
-      return "To take a kidney test: 1) Go to the Test page, 2) Upload an image or use your camera, 3) Click 'Start Scan' to analyze the image. Our AI will provide results in seconds!";
+  useEffect(() => {
+    if (API_KEY === 'PASTE_YOUR_API_KEY_HERE') {
+      setApiKeyMissing(true);
     }
+  }, [API_KEY]);
+
+  // This function now calls the Gemini API
+  const getGeminiResponse = async (userMessage: string): Promise<string> => {
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-preview-0514:generateContent?key=${API_KEY}`;
     
-    if (lowerMessage.includes('red') || lowerMessage.includes('discoloration') || lowerMessage.includes('color')) {
-      return "Red discoloration in urine can indicate various conditions like UTIs, kidney stones, or other kidney issues. However, our AI analysis is not a substitute for professional medical advice. Please consult a healthcare provider for proper diagnosis.";
+    // System instruction to guide the AI's behavior
+    const systemInstruction = {
+      parts: [{
+        text: "You are Carenest AI, a friendly and helpful kidney health assistant. Provide concise, informative, and safe advice regarding kidney health. Always remind users that you are an AI assistant, not a medical professional, and they should consult a doctor for any medical concerns or diagnosis. Do not provide a diagnosis."
+      }]
+    };
+
+    const payload = {
+      contents: [{ parts: [{ text: userMessage }] }],
+      systemInstruction: systemInstruction,
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. Please try again.";
+    } catch (error) {
+      console.error("Error fetching Gemini response:", error);
+      return "Sorry, something went wrong. Please check your API key and internet connection, then try again.";
     }
-    
-    if (lowerMessage.includes('kidney') || lowerMessage.includes('health')) {
-      return "For optimal kidney health: drink 8-10 glasses of water daily, limit sodium intake, exercise regularly, avoid excessive protein, and get regular check-ups. Early detection is key to preventing serious kidney problems!";
-    }
-    
-    if (lowerMessage.includes('accurate') || lowerMessage.includes('reliable')) {
-      return "Our AI model is trained on medical data, but it's designed for screening purposes only. Always consult with healthcare professionals for definitive diagnosis and treatment. Think of our tool as an early warning system.";
-    }
-    
-    if (lowerMessage.includes('symptoms')) {
-      return "Common kidney problem symptoms include: changes in urination, swelling in legs/ankles, fatigue, nausea, back pain, and high blood pressure. If you experience these, please see a doctor promptly.";
-    }
-    
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      return "Hello! I'm here to help with your kidney health questions. You can ask me about taking tests, understanding symptoms, or general kidney health tips.";
-    }
-    
-    // Default response
-    return "I'm here to help with kidney health questions! You can ask me about: taking tests, understanding symptoms, kidney health tips, or what our AI analysis means. What would you like to know?";
   };
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -80,21 +95,21 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputText;
     setInputText('');
     setIsTyping(true);
+    
+    const botResponseText = await getGeminiResponse(currentInput);
 
-    // Simulate typing delay
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputText),
-        isBot: true,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1500);
+    const botMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      text: botResponseText,
+      isBot: true,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, botMessage]);
+    setIsTyping(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -135,6 +150,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
             </CardHeader>
             
             <CardContent className="flex-1 flex flex-col">
+              {apiKeyMissing && (
+                 <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                    <div className="flex">
+                        <div className="py-1"><AlertTriangle className="h-5 w-5 text-yellow-500 mr-3"/></div>
+                        <div>
+                            <p className="font-bold">Configuration Required</p>
+                            <p className="text-sm">Please insert your Google AI Studio API key in the `ChatBot.tsx` file to enable the AI.</p>
+                        </div>
+                    </div>
+                </div>
+              )}
               <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
@@ -155,7 +181,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
                           ? 'bg-white border border-gray-200' 
                           : 'bg-blue-600 text-white'
                       }`}>
-                        <p className="text-sm">{message.text}</p>
+                        <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                         <p className={`text-xs mt-1 ${
                           message.isBot ? 'text-gray-500' : 'text-blue-100'
                         }`}>
@@ -192,8 +218,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me about kidney health, testing, or symptoms..."
                   className="flex-1"
+                  disabled={isTyping || apiKeyMissing}
                 />
-                <Button onClick={handleSendMessage} disabled={!inputText.trim() || isTyping}>
+                <Button onClick={handleSendMessage} disabled={!inputText.trim() || isTyping || apiKeyMissing}>
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
