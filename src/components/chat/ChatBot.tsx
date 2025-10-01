@@ -139,22 +139,27 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
 
   // Function to call Gemini API (Free Tier Compatible)
   const getGeminiResponse = async (userMessage: string): Promise<string> => {
-    // Using gemini-1.5-flash - the best free tier model
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    // Using gemini-2.0-flash-exp - latest free tier model
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`;
+    
+    const systemPrompt = "You are Carenest AI, a friendly and helpful kidney health assistant. Provide concise, informative, and safe advice regarding kidney health. Always remind users that you are an AI assistant, not a medical professional, and they should consult a doctor for any medical concerns or diagnosis. Do not provide a diagnosis.";
     
     const payload = {
       contents: [
         {
+          role: "user",
           parts: [
             {
-              text: `You are Carenest AI, a friendly and helpful kidney health assistant. Provide concise, informative, and safe advice regarding kidney health. Always remind users that you are an AI assistant, not a medical professional, and they should consult a doctor for any medical concerns or diagnosis. Do not provide a diagnosis.\n\nUser question: ${userMessage}`
+              text: systemPrompt + "\n\n" + userMessage
             }
           ]
         }
       ],
       generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 800,
+        temperature: 0.9,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
       }
     };
 
@@ -169,24 +174,32 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("API Error:", errorData);
+        console.error("API Error Details:", errorData);
+        console.error("Status:", response.status);
+        console.error("Status Text:", response.statusText);
         
         if (response.status === 400) {
-          return "There was an issue with the request. Please check your API key configuration.";
+          const errorMsg = errorData?.error?.message || "Invalid request";
+          return `Configuration error: ${errorMsg}. Please verify your API key is correct and has Generative Language API enabled.`;
+        } else if (response.status === 403) {
+          return "API key error: Please check that your API key is valid and the Generative Language API is enabled in Google Cloud Console.";
         } else if (response.status === 429) {
           return "Rate limit reached. Please wait a moment before trying again.";
         } else {
-          return `API error (${response.status}). Please verify your API key and try again.`;
+          return `API error (${response.status}). Please verify your API key and try again. Check console for details.`;
         }
       }
       
       const result = await response.json();
+      console.log("API Response:", result);
+      
       const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (aiResponse) {
         return aiResponse;
       } else {
-        return "I couldn't generate a response. Please try rephrasing your question.";
+        console.error("Unexpected response format:", result);
+        return "I received an unexpected response. Please try again.";
       }
     } catch (error) {
       console.error("Error fetching Gemini response:", error);
