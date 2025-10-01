@@ -125,6 +125,18 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Clean up AI response formatting
+  const cleanResponse = (text: string): string => {
+    // Remove asterisks and clean up formatting
+    let cleaned = text
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/\*/g, '')   // Remove asterisks
+      .replace(/\n{3,}/g, '\n\n') // Max 2 line breaks
+      .trim();
+    
+    return cleaned;
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -142,7 +154,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
     // Using gemini-2.0-flash-exp - latest free tier model
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`;
     
-    const systemPrompt = "You are Carenest AI, a friendly and helpful kidney health assistant. Provide concise, informative, and safe advice regarding kidney health. Always remind users that you are an AI assistant, not a medical professional, and they should consult a doctor for any medical concerns or diagnosis. Do not provide a diagnosis.";
+    const systemPrompt = `You are Carenest AI, a friendly kidney health assistant. 
+
+IMPORTANT FORMATTING RULES:
+- Keep responses SHORT and CONCISE (3-5 sentences maximum)
+- Use simple paragraphs, NO asterisks (*), NO bullet points, NO special formatting
+- Write in plain, natural language
+- At the end, add ONLY this exact line: "⚠️ I'm an AI assistant, not a doctor. Please consult a healthcare professional for medical advice."
+
+Provide helpful but brief information about kidney health.`;
     
     const payload = {
       contents: [
@@ -150,16 +170,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
           role: "user",
           parts: [
             {
-              text: systemPrompt + "\n\n" + userMessage
+              text: systemPrompt + "\n\nUser question: " + userMessage
             }
           ]
         }
       ],
       generationConfig: {
-        temperature: 0.9,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+        temperature: 0.7,
+        topK: 32,
+        topP: 0.9,
+        maxOutputTokens: 400,
       }
     };
 
@@ -193,9 +213,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
       const result = await response.json();
       console.log("API Response:", result);
       
-      const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      let aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (aiResponse) {
+        // Clean the response
+        aiResponse = cleanResponse(aiResponse);
         return aiResponse;
       } else {
         console.error("Unexpected response format:", result);
@@ -264,17 +286,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
         </div>
         
         <div>
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
+          <Card className="h-[600px] flex flex-col overflow-hidden">
+            <CardHeader className="flex-shrink-0">
               <CardTitle className="flex items-center">
                 <Bot className="w-5 h-5 mr-2 text-blue-600" />
                 Chat with Carenest AI
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="flex-1 flex flex-col">
+            <CardContent className="flex-1 flex flex-col overflow-hidden">
               {apiKeyMissing && (
-                <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 flex-shrink-0">
                   <div className="flex">
                     <div className="py-1">
                       <AlertTriangle className="h-5 w-5 text-yellow-500 mr-3"/>
@@ -287,7 +309,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
                 </div>
               )}
               
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 rounded-lg">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
                     <div className={`flex items-start space-x-2 max-w-[80%] ${
@@ -307,7 +329,24 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
                           ? 'bg-white border border-gray-200' 
                           : 'bg-blue-600 text-white'
                       }`}>
-                        <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                        <div className="text-sm whitespace-pre-wrap">
+                          {message.isBot ? (
+                            <>
+                              {message.text.split('⚠️').map((part, index) => {
+                                if (index === 0) return <span key={index}>{part}</span>;
+                                return (
+                                  <span key={index}>
+                                    <span className="block mt-2 text-red-600 font-medium">
+                                      ⚠️{part}
+                                    </span>
+                                  </span>
+                                );
+                              })}
+                            </>
+                          ) : (
+                            message.text
+                          )}
+                        </div>
                         <p className={`text-xs mt-1 ${
                           message.isBot ? 'text-gray-500' : 'text-blue-100'
                         }`}>
