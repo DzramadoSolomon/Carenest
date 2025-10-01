@@ -20,7 +20,7 @@ interface ChatBotProps {
 const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
   // --- IMPORTANT ---
   // PASTE YOUR GOOGLE AI STUDIO API KEY HERE
-  const API_KEY = 'PASTE_YOUR_API_KEY_HERE';
+  const API_KEY = 'AIzaSyCX987vX-vM5t53m2GRjQ_llrI0I7npTo4';
 
   const [messages, setMessages] = useState<Message[]>([
     {
