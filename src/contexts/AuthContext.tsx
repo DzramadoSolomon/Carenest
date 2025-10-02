@@ -76,6 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate brief processing
     await new Promise(resolve => setTimeout(resolve, 300));
     
+    // Clear all previous session data to ensure fresh state
+    sessionStorage.clear();
+    
     const guestUser: User = {
       id: 'guest-' + Date.now(),
       email: 'guest@carenest.app',
