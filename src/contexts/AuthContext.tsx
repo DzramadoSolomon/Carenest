@@ -32,7 +32,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedUser = sessionStorage.getItem('carenest_user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      // If it's a guest user from a previous session, clear everything and don't restore
+      if (parsedUser.isGuest) {
+        sessionStorage.clear();
+        setUser(null);
+      } else {
+        setUser(parsedUser);
+      }
     }
   }, []);
 
@@ -76,8 +83,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate brief processing
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    // Clear all previous session data to ensure fresh state
-    sessionStorage.clear();
+    // Clear only app-specific data, keeping system data intact
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('carenest_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
     
     const guestUser: User = {
       id: 'guest-' + Date.now(),
