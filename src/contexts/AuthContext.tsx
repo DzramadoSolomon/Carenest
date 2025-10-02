@@ -43,18 +43,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const clearAppStorage = () => {
+    // Clear all app-specific data from both sessionStorage and localStorage
+    const keysToKeep = new Set(['theme', 'language']); // System keys to preserve
+    
+    // Clear sessionStorage
+    Object.keys(sessionStorage).forEach(key => {
+      if (!keysToKeep.has(key)) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Clear localStorage (where test history is stored)
+    Object.keys(localStorage).forEach(key => {
+      if (!keysToKeep.has(key)) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock validation
     if (email && password.length >= 6) {
-      // Clear all app-specific data for fresh login
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('carenest_')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+      // Clear all app data for fresh login
+      clearAppStorage();
       
       const user = {
         id: '1',
@@ -74,12 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Mock validation
     if (email && password.length >= 6 && name) {
-      // Clear all app-specific data for fresh signup
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('carenest_')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+      // Clear all app data for fresh signup
+      clearAppStorage();
       
       const user = {
         id: '1',
@@ -97,12 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate brief processing
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    // Clear only app-specific data, keeping system data intact
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('carenest_')) {
-        sessionStorage.removeItem(key);
-      }
-    });
+    // Clear all app data for fresh guest session
+    clearAppStorage();
     
     const guestUser: User = {
       id: 'guest-' + Date.now(),
