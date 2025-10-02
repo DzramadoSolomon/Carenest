@@ -68,9 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Mock validation
     if (email && password.length >= 6) {
-      // Clear all app data for fresh login
-      clearAppStorage();
-      
       const user = {
         id: '1',
         email,
@@ -89,9 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Mock validation
     if (email && password.length >= 6 && name) {
-      // Clear all app data for fresh signup
-      clearAppStorage();
-      
       const user = {
         id: '1',
         email,
