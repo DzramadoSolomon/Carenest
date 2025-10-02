@@ -1,4 +1,3 @@
-// AuthPage.tsx
 import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
@@ -18,34 +17,33 @@ const AuthPage: React.FC = () => {
   const continueAsGuest = async () => {
     setIsGuestMode(true);
 
-    toast({
-      title: "Guest Mode Activated",
-      description: "⚠️ **Warning**: Your data will not be saved and all results will be lost upon leaving the app.",
-      duration: 5000,
-      variant: "default",
-    });
+    try {
+      // Show warning toast
+      toast({
+        title: "Guest Mode Activated",
+        description: "⚠️ Warning: Your data will not be saved and all results will be lost upon leaving the app.",
+        duration: 4000,
+        variant: "default",
+      });
 
-    // Delay for UX - shows "Entering as Guest..." message
-    setTimeout(async () => {
-      try {
-        // This will authenticate the user as a guest with full access
-        await loginAsGuest();
-        
-        // Optional success toast
-        toast({
-          title: "Welcome, Guest!",
-          description: "You now have full access to Carenest features.",
-          duration: 3000,
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to enter guest mode. Please try again.",
-          variant: "destructive",
-        });
-        setIsGuestMode(false);
-      }
-    }, 500);
+      // Login as guest - this will authenticate and redirect automatically
+      await loginAsGuest();
+      
+      // Success toast (optional - will show briefly before redirect)
+      toast({
+        title: "Welcome, Guest!",
+        description: "You now have full access to Carenest features.",
+        duration: 2000,
+      });
+    } catch (error) {
+      // Handle any errors
+      toast({
+        title: "Error",
+        description: "Failed to enter guest mode. Please try again.",
+        variant: "destructive",
+      });
+      setIsGuestMode(false);
+    }
   };
 
   return (
@@ -55,6 +53,7 @@ const AuthPage: React.FC = () => {
           <h1 className="text-4xl font-bold text-blue-600 mb-2">Carenest</h1>
           <p className="text-gray-600">Early Detection. Better Protection.</p>
         </div>
+        
         {isLogin ? (
           <LoginForm onToggleMode={toggleMode} />
         ) : (
@@ -68,6 +67,7 @@ const AuthPage: React.FC = () => {
             <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
+          
           <Button
             variant="outline"
             className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
@@ -76,6 +76,7 @@ const AuthPage: React.FC = () => {
           >
             {isGuestMode ? "Entering as Guest..." : "Continue as Guest 🚀"}
           </Button>
+          
           <p className="text-center text-xs text-gray-500 mt-2">
             Results will be lost, and data will not be saved after leaving the app.
           </p>
