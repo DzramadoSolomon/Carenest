@@ -4,12 +4,14 @@ interface User {
   id: string;
   email: string;
   name: string;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, name: string) => Promise<boolean>;
+  loginAsGuest: () => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -28,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('carenest_user');
+    const savedUser = sessionStorage.getItem('carenest_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -46,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: email.split('@')[0]
       };
       setUser(user);
-      localStorage.setItem('carenest_user', JSON.stringify(user));
+      sessionStorage.setItem('carenest_user', JSON.stringify(user));
       return true;
     }
     return false;
@@ -64,15 +66,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name
       };
       setUser(user);
-      localStorage.setItem('carenest_user', JSON.stringify(user));
+      sessionStorage.setItem('carenest_user', JSON.stringify(user));
       return true;
     }
     return false;
   };
 
+  const loginAsGuest = async (): Promise<void> => {
+    // Simulate brief processing
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const guestUser: User = {
+      id: 'guest-' + Date.now(),
+      email: 'guest@carenest.app',
+      name: 'Guest User',
+      isGuest: true
+    };
+    
+    setUser(guestUser);
+    // Use sessionStorage for guest (data cleared when browser closes)
+    sessionStorage.setItem('carenest_user', JSON.stringify(guestUser));
+  };
+
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('carenest_user');
+    sessionStorage.removeItem('carenest_user');
   };
 
   return (
@@ -80,6 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       login,
       signup,
+      loginAsGuest,
       logout,
       isAuthenticated: !!user
     }}>
