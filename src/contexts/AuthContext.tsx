@@ -49,6 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Mock validation
     if (email && password.length >= 6) {
+      // Clear all app-specific data for fresh login
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('carenest_')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
       const user = {
         id: '1',
         email,
@@ -67,6 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Mock validation
     if (email && password.length >= 6 && name) {
+      // Clear all app-specific data for fresh signup
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('carenest_')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
       const user = {
         id: '1',
         email,
