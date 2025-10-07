@@ -4,6 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Send, Bot, User, ArrowLeft, Info, AlertTriangle } from 'lucide-react';
+//Importing new ChatBot ICON
+import doctorAvatar from 'public/doctorAvatar.jpg';
+
 
 interface Message {
   id: string;
@@ -160,7 +163,7 @@ IMPORTANT FORMATTING RULES:
 - Keep responses SHORT and CONCISE (3-5 sentences maximum)
 - Use simple paragraphs, NO asterisks (*), NO bullet points, NO special formatting
 - Write in plain, natural language
-- At the end, add ONLY this exact line: "⚠️ I'm an AI assistant, not a doctor. Please consult a healthcare professional for medical advice."
+- At the end, add ONLY this exact line: "✅ For personalized advice, please consult our pharmacist, Gabriel Agana."`;
 
 Provide helpful but brief information about kidney health.`;
     
@@ -270,13 +273,15 @@ Provide helpful but brief information about kidney health.`;
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">Carenest AI Assistant</h1>
+        {/* Update the main title */}
+        <h1 className="text-3xl font-bold text-gray-900">JamesBot</h1>
       </div>
 
       <Tabs defaultValue="chat" className="w-full">
         <div className="flex border-b border-gray-200 mb-4">
           <button className="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">
-            <Bot className="w-4 h-4 inline mr-2" />
+             {/* Replace Bot icon with the avatar image */}
+            <img src={doctorAvatar} alt="Chat Icon" className="w-4 h-4 inline mr-2 rounded-full" />
             Chat
           </button>
           <button className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900">
@@ -289,8 +294,9 @@ Provide helpful but brief information about kidney health.`;
           <Card className="h-[600px] flex flex-col overflow-hidden">
             <CardHeader className="flex-shrink-0">
               <CardTitle className="flex items-center">
-                <Bot className="w-5 h-5 mr-2 text-blue-600" />
-                Chat with Carenest AI
+                 {/* Replace Bot icon with the avatar image and update title */}
+                <img src={doctorAvatar} alt="JamesBot Avatar" className="w-5 h-5 mr-2 rounded-full" />
+                Chat with JamesBot
               </CardTitle>
             </CardHeader>
             
@@ -315,11 +321,12 @@ Provide helpful but brief information about kidney health.`;
                     <div className={`flex items-start space-x-2 max-w-[80%] ${
                       message.isBot ? 'flex-row' : 'flex-row-reverse space-x-reverse'
                     }`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.isBot ? 'bg-blue-100' : 'bg-green-100'
                       }`}>
                         {message.isBot ? (
-                          <Bot className="w-4 h-4 text-blue-600" />
+                          // Replace Bot icon with the avatar image
+                          <img src={doctorAvatar} alt="JamesBot Avatar" className="w-full h-full object-cover rounded-full" />
                         ) : (
                           <User className="w-4 h-4 text-green-600" />
                         )}
@@ -332,12 +339,19 @@ Provide helpful but brief information about kidney health.`;
                         <div className="text-sm whitespace-pre-wrap">
                           {message.isBot ? (
                             <>
-                              {message.text.split('⚠️').map((part, index) => {
+                              {/* Update logic to handle the new green caution message */}
+                              {message.text.split('✅').map((part, index) => {
                                 if (index === 0) return <span key={index}>{part}</span>;
                                 return (
-                                  <span key={index}>
-                                    <span className="block mt-2 text-red-600 font-medium">
-                                      ⚠️{part}
+                                  <span key={index} className="block mt-2">
+                                    <span className="p-2 bg-green-100 text-green-800 rounded-md inline-block">
+                                      ✅ For personalized advice, please consult our pharmacist,{' '}
+                                      <a 
+                                        href="mailto:gabrielagana123@gmail.com" 
+                                        className="font-semibold underline hover:text-green-900"
+                                      >
+                                        Gabriel Agana
+                                      </a>.
                                     </span>
                                   </span>
                                 );
@@ -347,11 +361,7 @@ Provide helpful but brief information about kidney health.`;
                             message.text
                           )}
                         </div>
-                        <p className={`text-xs mt-1 ${
-                          message.isBot ? 'text-gray-500' : 'text-blue-100'
-                        }`}>
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
+                        {/* ... (timestamp) */}
                       </div>
                     </div>
                   </div>
@@ -360,8 +370,9 @@ Provide helpful but brief information about kidney health.`;
                 {isTyping && (
                   <div className="flex justify-start">
                     <div className="flex items-start space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-blue-600" />
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                         {/* Replace Bot icon with the avatar image */}
+                        <img src={doctorAvatar} alt="Typing Avatar" className="w-full h-full object-cover rounded-full" />
                       </div>
                       <div className="bg-white border border-gray-200 p-3 rounded-lg">
                         <div className="flex space-x-1">
