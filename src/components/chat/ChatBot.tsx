@@ -157,7 +157,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
     // Using gemini-2.0-flash-exp - latest free tier model
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`;
     
-    const systemPrompt = `You are Carenest AI, a friendly kidney health assistant. 
+    const systemPrompt = `You are JamesBot, a friendly kidney health assistant. 
 
 IMPORTANT FORMATTING RULES:
 - Keep responses SHORT and CONCISE (3-5 sentences maximum)
