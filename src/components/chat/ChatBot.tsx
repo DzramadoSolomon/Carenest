@@ -163,7 +163,7 @@ IMPORTANT FORMATTING RULES:
 - Keep responses SHORT and CONCISE (3-5 sentences maximum)
 - Use simple paragraphs, NO asterisks (*), NO bullet points, NO special formatting
 - Write in plain, natural language
-- At the end, add ONLY this exact line: "✅ For personalized advice, please consult our pharmacist, Gabriel Agana."`;
+- At the end, add ONLY this exact line: "✅ For personalized advice, please consult our pharmacist, Gabriel Agana.";
 
 Provide helpful but brief information about kidney health.`;
     
