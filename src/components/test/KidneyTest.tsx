@@ -4,10 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Camera, Scan, ArrowLeft, SwitchCamera } from 'lucide-react';
 import { analyzeImageWithModel, saveAnalysisResult, AnalysisResult } from '@/utils/model';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom'; 
 
-interface KidneyTestProps {
-  onBack: () => void;
-}
 
 const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -200,7 +198,8 @@ const KidneyTest: React.FC<KidneyTestProps> = ({ onBack }) => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center mb-6">
-        <Button variant="ghost" onClick={onBack} className="mr-4">
+        {/* 5. Update the onClick handler */}
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
