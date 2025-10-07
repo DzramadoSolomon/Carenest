@@ -1,6 +1,4 @@
-import React from 'react';
-// 1. Import hooks from react-router-dom
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AuthPage from './auth/AuthPage';
@@ -13,22 +11,13 @@ import { Button } from '@/components/ui/button';
 import { LogOut, Menu, X, Home, TestTube, MessageCircle, Phone } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 
-// We no longer need the 'Page' type
-// type Page = 'dashboard' | 'test' | 'chat' | 'history' | 'contact';
+type Page = 'dashboard' | 'test' | 'chat' | 'history' | 'contact';
 
 const MainApp: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
   const { sidebarOpen, toggleSidebar } = useAppContext();
   const isMobile = useIsMobile();
-  // 2. Initialize the router hooks
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // 3. Remove the useState for currentPage
-  // const [currentPage, setCurrentPage] = useState<Page>('dashboard');
-
-  // 4. Determine the current page from the URL pathname
-  const currentPage = location.pathname.substring(1) || 'dashboard';
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
 
   if (!isAuthenticated) {
     return <AuthPage />;
@@ -36,22 +25,34 @@ const MainApp: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/dashboard'); // Use navigate on logout
+    setCurrentPage('dashboard');
   };
 
-  // 5. Update the navigation function to use navigate()
-  const handleNavigation = (page: string) => {
-    navigate(`/${page}`);
+  const handleNavigation = (page: Page) => {
+    setCurrentPage(page);
     if (isMobile) {
       toggleSidebar();
     }
   };
-  
-  // The renderPage() function is no longer needed. We'll use <Routes> directly.
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'test':
+        return <KidneyTest onBack={() => setCurrentPage('dashboard')} />;
+      case 'chat':
+        return <ChatBot onBack={() => setCurrentPage('dashboard')} />;
+      case 'history':
+        return <TestHistory onBack={() => setCurrentPage('dashboard')} />;
+      case 'contact':
+        return <ContactPage onBack={() => setCurrentPage('dashboard')} />;
+      default:
+        return <Dashboard onNavigate={setCurrentPage} />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header (updated with navigate) */}
+      {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
@@ -62,8 +63,8 @@ const MainApp: React.FC = () => {
                 </Button>
               )}
               <h1 className="text-xl sm:text-2xl font-bold text-blue-600 cursor-pointer" 
-                  onClick={() => navigate('/dashboard')}>
-                Renolab
+                  onClick={() => setCurrentPage('dashboard')}>
+                Carenest
               </h1>
               {!isMobile && (
                 <p className="text-sm text-gray-500 ml-2 hidden sm:block">Early Detection. Better Protection.</p>
@@ -72,10 +73,18 @@ const MainApp: React.FC = () => {
             <div className="flex items-center space-x-2 sm:space-x-4">
               {!isMobile && (
                 <nav className="flex space-x-2 sm:space-x-4">
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>Home</Button>
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/test')}>Test</Button>
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/chat')}>Chat</Button>
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/contact')}>Contact</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentPage('dashboard')}>
+                    Home
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentPage('test')}>
+                    Test
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentPage('chat')}>
+                    Chat
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setCurrentPage('contact')}>
+                    Contact
+                  </Button>
                 </nav>
               )}
               <span className="text-xs sm:text-sm text-gray-600 hidden sm:block">Welcome, {user?.name}</span>
@@ -103,17 +112,37 @@ const MainApp: React.FC = () => {
               </div>
             </div>
             <nav className="p-4 space-y-2">
-              <Button variant={currentPage === 'dashboard' ? 'default' : 'ghost'} className="w-full justify-start" onClick={() => handleNavigation('dashboard')}>
-                <Home className="w-4 h-4 mr-3" />Dashboard
+              <Button 
+                variant={currentPage === 'dashboard' ? 'default' : 'ghost'} 
+                className="w-full justify-start" 
+                onClick={() => handleNavigation('dashboard')}
+              >
+                <Home className="w-4 h-4 mr-3" />
+                Dashboard
               </Button>
-              <Button variant={currentPage === 'test' ? 'default' : 'ghost'} className="w-full justify-start" onClick={() => handleNavigation('test')}>
-                <TestTube className="w-4 h-4 mr-3" />Kidney Test
+              <Button 
+                variant={currentPage === 'test' ? 'default' : 'ghost'} 
+                className="w-full justify-start" 
+                onClick={() => handleNavigation('test')}
+              >
+                <TestTube className="w-4 h-4 mr-3" />
+                Kidney Test
               </Button>
-              <Button variant={currentPage === 'chat' ? 'default' : 'ghost'} className="w-full justify-start" onClick={() => handleNavigation('chat')}>
-                <MessageCircle className="w-4 h-4 mr-3" />AI Chat
+              <Button 
+                variant={currentPage === 'chat' ? 'default' : 'ghost'} 
+                className="w-full justify-start" 
+                onClick={() => handleNavigation('chat')}
+              >
+                <MessageCircle className="w-4 h-4 mr-3" />
+                AI Chat
               </Button>
-              <Button variant={currentPage === 'contact' ? 'default' : 'ghost'} className="w-full justify-start" onClick={() => handleNavigation('contact')}>
-                <Phone className="w-4 h-4 mr-3" />Contact
+              <Button 
+                variant={currentPage === 'contact' ? 'default' : 'ghost'} 
+                className="w-full justify-start" 
+                onClick={() => handleNavigation('contact')}
+              >
+                <Phone className="w-4 h-4 mr-3" />
+                Contact
               </Button>
             </nav>
             <div className="absolute bottom-4 left-4 right-4">
@@ -133,15 +162,8 @@ const MainApp: React.FC = () => {
         </>
       )}
       
-       <main className="min-h-[calc(100vh-140px)] pb-16 sm:pb-0">
-        {/* 6. Replace renderPage() with a Routes block */}
-        <Routes>
-          <Route path="/test" element={<KidneyTest onBack={() => navigate('/dashboard')} />} />
-          <Route path="/chat" element={<ChatBot onBack={() => navigate('/dashboard')} />} />
-          <Route path="/history" element={<TestHistory onBack={() => navigate('/dashboard')} />} />
-          <Route path="/contact" element={<ContactPage onBack={() => navigate('/dashboard')} />} />
-          <Route path="/dashboard" element={<Dashboard onNavigate={(page) => navigate(`/${page}`)} />} />
-        </Routes>
+      <main className="min-h-[calc(100vh-140px)] pb-16 sm:pb-0">
+        {renderPage()}
       </main>
       
       <footer className="bg-white border-t py-3 sm:py-4">
