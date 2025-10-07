@@ -38,7 +38,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <MessageCircle className="w-6 h-6 text-green-600" />
             </div>
-            <CardTitle className="text-lg">Ask Carenest AI</CardTitle>
+            {/* Update the card title */}
+            <CardTitle className="text-lg">Ask JamesBot</CardTitle>
             <CardDescription>
               Get instant answers about kidney health and testing
             </CardDescription>
