@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TestTube, MessageCircle, History, Users } from 'lucide-react';
+import doctorAvatar from '@/assets/doctorAvatar.jpg'; // To this (if you have '@' path alias for 'src')
 
 interface DashboardProps {
   onNavigate: (page: 'test' | 'chat' | 'history' | 'contact') => void;
