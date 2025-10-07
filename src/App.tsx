@@ -1,17 +1,20 @@
 // src/App.tsx
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme-provider";
-import MainApp from "./pages/MainApp"; // Assuming MainApp.tsx is in pages folder
-import Dashboard from "./pages/dashboard/Dashboard";
-import KidneyTest from "./pages/test/KidneyTest";
-import ChatBot from "./pages/chat/ChatBot";
-import TestHistory from "./pages/history/TestHistory";
-import ContactPage from "./pages/contact/ContactPage";
+// Corrected: theme-provider.tsx is in 'src', not 'src/components'
+import { ThemeProvider } from "@/theme-provider"; 
+import MainApp from "./MainApp";
+// Corrected: Components are in 'src/components', not 'src/pages'
+import Dashboard from "@/components/dashboard/Dashboard"; 
+import KidneyTest from "@/components/test/KidneyTest";
+import ChatBot from "@/components/chat/ChatBot";
+import TestHistory from "@/components/history/TestHistory";
+import ContactPage from "@/components/contact/ContactPage";
+// Corrected: Assuming NotFound.tsx is in 'src' as there is no 'pages' directory
+
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext"; // Import AuthProvider
 import { AppContextProvider } from "./contexts/AppContext"; // Import AppContextProvider
