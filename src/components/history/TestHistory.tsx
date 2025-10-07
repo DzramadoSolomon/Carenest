@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Activity, TrendingUp } from 'lucide-react';
 import { getAnalysisHistory, AnalysisResult } from '@/utils/model';
+import { useNavigate } from 'react-router-dom';
+
 import {
   LineChart,
   Line,
@@ -13,11 +15,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-interface TestHistoryProps {
-  onBack: () => void;
-}
-
-const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
+const TestHistory: React.FC = () => {
+  const navigate = useNavigate(); 
   // ... (no changes to state or helper functions) ...
   const [showAll, setShowAll] = useState(false);
   const history = getAnalysisHistory();
@@ -76,9 +75,9 @@ const TestHistory: React.FC<TestHistoryProps> = ({ onBack }) => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {/* ... (no changes to header) ... */}
       <div className="flex items-center mb-6">
-        <Button variant="ghost" onClick={onBack} className="mr-4">
+        {/* 5. Update the onClick handler */}
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
