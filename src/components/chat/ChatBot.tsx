@@ -25,7 +25,7 @@ const ChatBotExplanation: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Bot className="w-5 h-5 mr-2" />
-            How the Carenest AI Chatbot Works
+            How the JamesBot Works
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -113,7 +113,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! I'm Carenest AI, your kidney health assistant. How can I help you today?",
+      text: "Hello! I am JamesBot, your kidney health assistant. How can I help you today?",
       isBot: true,
       timestamp: new Date()
     }
