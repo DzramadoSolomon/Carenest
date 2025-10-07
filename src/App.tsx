@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // Corrected: theme-provider.tsx is in 'src', not 'src/components'
 import { ThemeProvider } from "@/components/theme-provider"; 
-import MainApp from "./MainApp";
+import MainApp from "src/components/MainApp.tsx";
 // Corrected: Components are in 'src/components', not 'src/pages'
 import Dashboard from "@/components/dashboard/Dashboard"; 
 import KidneyTest from "@/components/test/KidneyTest";
