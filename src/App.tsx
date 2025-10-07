@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // FIX: theme-provider.tsx and MainApp.tsx are located directly in 'src', 
 // so a relative path import './' is used.
-import { ThemeProvider } from "./theme-provider"; // CORRECTED PATH
+import { ThemeProvider } from "@/components/theme-provider"; // CORRECTED PATH
 import MainApp from "./MainApp.tsx"; // CORRECTED PATH
 
 // These imports assume a working path alias where "@/components" resolves to "src/components"
