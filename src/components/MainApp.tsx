@@ -168,7 +168,7 @@ const MainApp: React.FC = () => {
       
       <footer className="bg-white border-t py-3 sm:py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-xs sm:text-sm text-gray-500">
-          © Carenest 2025. All Rights Reserved.
+          © Renolab 2025. All Rights Reserved.
         </div>
       </footer>
     </div>
