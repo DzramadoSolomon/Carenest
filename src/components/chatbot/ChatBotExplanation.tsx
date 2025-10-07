@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Bot, MessageSquare, Brain, Zap } from 'lucide-react';
+import doctorAvatar from 'public/doctorAvatar.jpg';
 
 const ChatBotExplanation: React.FC = () => {
   return (
@@ -9,8 +10,9 @@ const ChatBotExplanation: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Bot className="w-5 h-5 mr-2" />
-            How the Carenest AI Chatbot Works
+            {/* Replace Bot icon and update title */}
+            <img src={doctorAvatar} alt="JamesBot Avatar" className="w-5 h-5 mr-2 rounded-full" />
+            How JamesBot Works
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
