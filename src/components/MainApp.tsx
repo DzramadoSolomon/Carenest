@@ -64,7 +64,7 @@ const MainApp: React.FC = () => {
               )}
               <h1 className="text-xl sm:text-2xl font-bold text-blue-600 cursor-pointer" 
                   onClick={() => setCurrentPage('dashboard')}>
-                Carenest
+                Renolab
               </h1>
               {!isMobile && (
                 <p className="text-sm text-gray-500 ml-2 hidden sm:block">Early Detection. Better Protection.</p>
