@@ -38,13 +38,13 @@ const MainApp: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'test':
-        return <KidneyTest onBack={() => setCurrentPage('test')} />;
+        return <KidneyTest onBack={() => setCurrentPage('dashboard')} />;
       case 'chat':
-        return <ChatBot onBack={() => setCurrentPage('chat')} />;
+        return <ChatBot onBack={() => setCurrentPage('dashboard')} />;
       case 'history':
-        return <TestHistory onBack={() => setCurrentPage('history')} />;
+        return <TestHistory onBack={() => setCurrentPage('dashboard')} />;
       case 'contact':
-        return <ContactPage onBack={() => setCurrentPage('contact')} />;
+        return <ContactPage onBack={() => setCurrentPage('dashboard')} />;
       default:
         return <Dashboard onNavigate={setCurrentPage} />;
     }
@@ -64,7 +64,7 @@ const MainApp: React.FC = () => {
               )}
               <h1 className="text-xl sm:text-2xl font-bold text-blue-600 cursor-pointer" 
                   onClick={() => setCurrentPage('dashboard')}>
-                Renolab
+                Carenest
               </h1>
               {!isMobile && (
                 <p className="text-sm text-gray-500 ml-2 hidden sm:block">Early Detection. Better Protection.</p>
@@ -168,7 +168,7 @@ const MainApp: React.FC = () => {
       
       <footer className="bg-white border-t py-3 sm:py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-xs sm:text-sm text-gray-500">
-          © Renolab 2025. All Rights Reserved.
+          © Carenest 2025. All Rights Reserved.
         </div>
       </footer>
     </div>
