@@ -38,13 +38,13 @@ const MainApp: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'test':
-        return <KidneyTest onBack={() => setCurrentPage('dashboard')} />;
+        return <KidneyTest onBack={() => setCurrentPage('test')} />;
       case 'chat':
-        return <ChatBot onBack={() => setCurrentPage('dashboard')} />;
+        return <ChatBot onBack={() => setCurrentPage('chat')} />;
       case 'history':
-        return <TestHistory onBack={() => setCurrentPage('dashboard')} />;
+        return <TestHistory onBack={() => setCurrentPage('history')} />;
       case 'contact':
-        return <ContactPage onBack={() => setCurrentPage('dashboard')} />;
+        return <ContactPage onBack={() => setCurrentPage('contact')} />;
       default:
         return <Dashboard onNavigate={setCurrentPage} />;
     }
