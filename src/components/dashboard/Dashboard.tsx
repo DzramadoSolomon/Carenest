@@ -12,7 +12,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Carenest</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Renolab</h1>
         <p className="text-gray-600">Your AI-powered kidney health companion</p>
       </div>
 
@@ -37,9 +37,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('chat')}>
           <CardHeader className="text-center">
             <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <MessageCircle className="w-6 h-6 text-green-600" />
+              {/* 2. Replace the MessageCircle icon with an img tag */}
+              <img 
+                src={doctorAvatar} 
+                alt="Ask JamesBot" 
+                className="w-full h-full object-cover rounded-full" 
+              />
             </div>
-            {/* Update the card title */}
             <CardTitle className="text-lg">Ask JamesBot</CardTitle>
             <CardDescription>
               Get instant answers about kidney health and testing
