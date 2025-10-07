@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Send, Bot, User, ArrowLeft, Info, AlertTriangle } from 'lucide-react';
 //Importing new ChatBot ICON
-import doctorAvatar from 'public/doctorAvatar.jpg';
-
+import doctorAvatar from '@/assets/doctorAvatar.jpg'; 
 
 interface Message {
   id: string;
