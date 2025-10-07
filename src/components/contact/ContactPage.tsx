@@ -100,7 +100,7 @@ const ContactPage: React.FC = () => {
               
               <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
                 <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Gabriel Agana Anongwin</h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-2">Developer & Co-Founder</p>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">Project & Research lead</p>
                 <div className="flex items-center text-green-600">
                   <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
                   <a 
