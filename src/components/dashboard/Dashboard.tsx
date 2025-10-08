@@ -80,7 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
             <CardTitle className="text-lg">Contact Team</CardTitle>
             <CardDescription>
-              Get in touch with the Carenest development team
+              Get in touch with the Renolab development team
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -92,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </div>
 
       <div className="mt-12 bg-blue-50 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">How Carenest Works</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">How Renolab Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-sm font-semibold">
