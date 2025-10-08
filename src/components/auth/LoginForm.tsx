@@ -49,7 +49,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold text-blue-600">Welcome Back</CardTitle>
-        <CardDescription>Sign in to your Carenest account</CardDescription>
+        <CardDescription>Sign in to your Renolab account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
