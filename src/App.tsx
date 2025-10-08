@@ -23,8 +23,10 @@ import ContactPage from "@/components/contact/ContactPage";
 // further correction if 'pages' folder does not exist.
 import NotFound from "./pages/NotFound"; 
 
-import { AuthProvider } from "./contexts/AuthContext";
-import { AppContextProvider } from "./contexts/AppContext";
+// import { AuthProvider } from "./contexts/AuthContext";
+// import { AppContextProvider } from "./contexts/AppContext";
+
+import { useAppContext } from '@/contexts/AppContext';
 
 const queryClient = new QueryClient();
 
