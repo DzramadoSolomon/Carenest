@@ -5,14 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Mail, User, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
-// interface ContactPageProps {
-//   onBack: () => void;
-// }
+interface ContactPageProps {
+  onBack: () => void;
+}
 
-const ContactPage: React.FC = () => { 
-  const navigate = useNavigate(); // 4. Initialize the hook
+const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,7 +59,7 @@ const ContactPage: React.FC = () => {
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <Button 
         variant="ghost" 
-        onClick={() => navigate(-1)}
+        onClick={onBack}
         className="mb-4 sm:mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -100,7 +98,7 @@ const ContactPage: React.FC = () => {
               
               <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
                 <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Gabriel Agana Anongwin</h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-2">Project & Research lead</p>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">Developer & Co-Founder</p>
                 <div className="flex items-center text-green-600">
                   <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
                   <a 
