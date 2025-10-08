@@ -6,8 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Send, Bot, User, ArrowLeft, Info, AlertTriangle } from 'lucide-react';
 //Importing new ChatBot ICON
 import doctorAvatar from '@/assets/doctorAvatar.jpg'; 
-import { useNavigate } from 'react-router-dom';
-
 
 interface Message {
   id: string;
@@ -16,6 +14,9 @@ interface Message {
   timestamp: Date;
 }
 
+interface ChatBotProps {
+  onBack: () => void;
+}
 
 const ChatBotExplanation: React.FC = () => {
   return (
@@ -101,8 +102,7 @@ const ChatBotExplanation: React.FC = () => {
   );
 };
 
-const ChatBot: React.FC = () => {
-  const navigate = useNavigate();
+const ChatBot: React.FC<ChatBotProps> = ({ onBack }) => {
   // ========================================
   // 🔑 PASTE YOUR GOOGLE AI STUDIO API KEY HERE
   // ========================================
@@ -268,11 +268,11 @@ Provide helpful but brief information about kidney health.`;
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center mb-6">
-        {/* 5. Update the onClick handler */}
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
+        <Button variant="ghost" onClick={onBack} className="mr-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
+        {/* Update the main title */}
         <h1 className="text-3xl font-bold text-gray-900">JamesBot</h1>
       </div>
 
