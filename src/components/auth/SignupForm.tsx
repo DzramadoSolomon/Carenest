@@ -26,7 +26,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
       if (success) {
         toast({
           title: "Account created!",
-          description: "Welcome to Carenest. You can now start using our services.",
+          description: "Welcome to Renolab. You can now start using our services.",
         });
       } else {
         toast({
@@ -49,7 +49,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-blue-600">Join Carenest</CardTitle>
+        <CardTitle className="text-2xl font-bold text-blue-600">Join Renolab</CardTitle>
         <CardDescription>Create your account to get started</CardDescription>
       </CardHeader>
       <CardContent>
