@@ -32,7 +32,7 @@ const AuthPage: React.FC = () => {
       // Success toast (optional - will show briefly before redirect)
       toast({
         title: "Welcome, Guest!",
-        description: "You now have full access to Carenest features.",
+        description: "You now have full access to Renolab features.",
         duration: 2000,
       });
     } catch (error) {
